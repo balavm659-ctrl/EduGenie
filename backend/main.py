@@ -67,7 +67,10 @@ origins = [
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://edugenie-frontend.onrender.com",
 ]
+# Remove empty strings and duplicates
+origins = list(set(o for o in origins if o))
 
 app.add_middleware(
     CORSMiddleware,

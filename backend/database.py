@@ -9,15 +9,22 @@ from .config import get_settings
 
 settings = get_settings()
 
-# Create engine with SQLite-specific settings
+# Render.com provides DATABASE_URL as 'postgres://...' but SQLAlchemy 2.x
+# requires the 'postgresql://' dialect prefix. Fix transparently.
+database_url = settings.DATABASE_URL
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+# Create engine with SQLite-specific settings when running locally
 connect_args = {}
-if "sqlite" in settings.DATABASE_URL:
+if database_url.startswith("sqlite"):
     connect_args["check_same_thread"] = False
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    database_url,
     connect_args=connect_args,
     echo=settings.DEBUG,
+    pool_pre_ping=True,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

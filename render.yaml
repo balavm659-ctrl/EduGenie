@@ -1,8 +1,5 @@
-# Render.com Blueprint — One-click deploy configuration
-# Docs: https://docs.render.com/blueprint-spec
-
 services:
-  # ── Backend (FastAPI + Python) ──
+  # Backend API
   - type: web
     name: edugenie-api
     runtime: python
@@ -11,33 +8,34 @@ services:
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GEMINI_API_KEY
-        sync: false  # You'll set this manually in the Render dashboard
+        sync: false
       - key: GEMINI_MODEL
         value: gemini-3.5-flash-lite
+      - key: DATABASE_URL
+        fromDatabase:
+          name: edugenie-db
+          property: connectionURI
       - key: JWT_SECRET
-        generateValue: true  # Render auto-generates a secure random string
+        generateValue: true
       - key: JWT_ALGORITHM
         value: HS256
       - key: JWT_EXPIRATION_HOURS
         value: "24"
-      - key: DATABASE_URL
-        value: sqlite:///./edugenie.db
       - key: FRONTEND_URL
-        fromService:
-          name: edugenie
-          type: web
-          property: host
+        value: https://edugenie-frontend.onrender.com
       - key: PYTHON_VERSION
         value: "3.11.0"
 
-  # ── Frontend (React + Vite Static Site) ──
+  # Frontend Static Site
   - type: web
-    name: edugenie
+    name: edugenie-frontend
     runtime: static
     plan: free
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://edugenie-api.onrender.com
     headers:
       - path: /*
         name: Cache-Control
@@ -46,9 +44,7 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-    envVars:
-      - key: VITE_API_URL
-        fromService:
-          name: edugenie-api
-          type: web
-          property: host
+
+databases:
+  - name: edugenie-db
+    plan: free
