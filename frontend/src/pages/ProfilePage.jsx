@@ -16,10 +16,12 @@ import {
   Loader2,
   BookOpen,
 } from 'lucide-react';
+import { useToast } from '../components/Toast';
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const toast = useToast();
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -66,16 +68,18 @@ export default function ProfilePage() {
       const updated = await api.updateProfile(formData);
       updateUser(updated);
       setSuccess(true);
+      toast.success('Profile Updated', 'Your learning preferences have been saved successfully.');
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       setError(err.message || 'Failed to update profile.');
+      toast.error('Update Failed', err.message || 'Failed to update profile.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-200">
+    <div className="max-w-4xl mx-auto space-y-8 animate-slide-up">
       
       {/* Header */}
       <div>

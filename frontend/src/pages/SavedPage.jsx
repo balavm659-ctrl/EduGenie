@@ -80,7 +80,7 @@ export default function SavedPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-200">
+    <div className="max-w-5xl mx-auto space-y-8 animate-slide-up">
       
       {/* Header */}
       <div>

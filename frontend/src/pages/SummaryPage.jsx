@@ -18,6 +18,7 @@ import {
   FileCheck,
   AlertCircle,
 } from 'lucide-react';
+import { useToast } from '../components/Toast';
 
 export default function SummaryPage() {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ export default function SummaryPage() {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const toast = useToast();
 
   const handleSummarize = async () => {
     setError('');
@@ -84,6 +86,7 @@ export default function SummaryPage() {
     const fullText = `# Summary\n${result.summary}\n\n## Key Points\n${result.key_points.map(p => `- ${p}`).join('\n')}\n\n## Revision\n${result.one_minute_revision}`;
     navigator.clipboard.writeText(fullText);
     setCopied(true);
+    toast.success('Copied!', 'Summary copied to clipboard.');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -109,6 +112,7 @@ export default function SummaryPage() {
         metadata_json: { length, key_points: result.key_points },
       });
       setSaved(true);
+      toast.success('Saved!', 'Summary saved to your library.');
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
       console.error(err);
@@ -126,7 +130,7 @@ export default function SummaryPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-200">
+    <div className="max-w-4xl mx-auto space-y-8 animate-slide-up">
       
       {/* Header */}
       <div className="text-center sm:text-left">
@@ -235,7 +239,7 @@ export default function SummaryPage() {
           <button
             onClick={handleSummarize}
             disabled={loading}
-            className="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-primary-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+            className="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-primary-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 active:scale-[0.97]"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             <span>Condense & Summarize</span>

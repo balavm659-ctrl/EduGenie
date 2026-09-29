@@ -80,7 +80,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-2 bg-white dark:bg-slate-900 text-slate-400 font-medium">Or continue with email</span>
+              <span className="px-2 bg-slate-50 dark:bg-darkBg-main text-slate-400 font-medium">Or continue with email</span>
             </div>
           </div>
 
@@ -116,7 +116,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm shadow-md shadow-primary-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm shadow-md shadow-primary-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 active:scale-[0.97]"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

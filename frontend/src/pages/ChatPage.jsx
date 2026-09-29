@@ -20,7 +20,10 @@ import {
   User,
   Loader2,
   MessageSquare,
+  X,
+  Menu,
 } from 'lucide-react';
+import { useToast } from '../components/Toast';
 
 export default function ChatPage() {
   const [searchParams] = useSearchParams();
@@ -34,6 +37,7 @@ export default function ChatPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [savedIndex, setSavedIndex] = useState(null);
+  const toast = useToast();
 
   const messagesEndRef = useRef(null);
 
@@ -154,6 +158,7 @@ export default function ChatPage() {
   const handleCopy = (content, index) => {
     navigator.clipboard.writeText(content);
     setCopiedIndex(index);
+    toast.success('Copied!', 'Response copied to clipboard.');
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
@@ -165,6 +170,7 @@ export default function ChatPage() {
         content: content,
       });
       setSavedIndex(index);
+      toast.success('Saved!', 'Response saved to your library.');
       setTimeout(() => setSavedIndex(null), 2000);
     } catch (err) {
       console.error("Failed to save item:", err);
@@ -178,17 +184,46 @@ export default function ChatPage() {
     }
   };
 
+  const [mobileListOpen, setMobileListOpen] = useState(false);
+
   return (
     <div className="h-[calc(100vh-8.5rem)] flex rounded-3xl overflow-hidden glass-panel border border-slate-200/80 dark:border-slate-800/80 shadow-xl">
       
-      {/* 1. Chats Sidebar */}
-      <div className="hidden md:flex flex-col w-72 border-r border-slate-200/80 dark:border-slate-800/80 bg-white/40 dark:bg-slate-900/40">
+      {/* Mobile conversation list backdrop */}
+      {mobileListOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm md:hidden animate-fade-in"
+          onClick={() => setMobileListOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* 1. Chats Sidebar — hidden on mobile, slide-out panel on toggle */}
+      <div className={`
+        ${mobileListOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0 transition-transform duration-200
+        fixed md:relative z-50 md:z-auto top-0 left-0 h-full
+        flex flex-col w-72 border-r border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 md:bg-white/40 md:dark:bg-slate-900/40
+      `}>
         
+        {/* Mobile close button */}
+        <div className="md:hidden flex items-center justify-between p-3 border-b border-slate-200/80 dark:border-slate-800/80">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Conversations</span>
+          <button
+            onClick={() => setMobileListOpen(false)}
+            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Close conversation list"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
         {/* Top actions */}
         <div className="p-3 border-b border-slate-200/80 dark:border-slate-800/80 space-y-2">
           <button
             onClick={handleNewChat}
-            className="w-full py-2.5 px-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+            className="w-full py-2.5 px-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.97]"
+            aria-label="Start new study session"
           >
             <Plus className="w-4 h-4" />
             <span>New Study Session</span>
@@ -203,6 +238,7 @@ export default function ChatPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchConversations()}
               placeholder="Search conversations..."
+              aria-label="Search conversations"
               className="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-800/60 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
@@ -214,12 +250,17 @@ export default function ChatPage() {
             conversations.map((chat) => (
               <div
                 key={chat.id}
-                onClick={() => loadChatDetail(chat.id)}
+                onClick={() => {
+                  loadChatDetail(chat.id);
+                  setMobileListOpen(false);
+                }}
                 className={`group flex items-center justify-between p-2.5 rounded-xl cursor-pointer text-xs transition-colors ${
                   currentChatId === chat.id
                     ? 'bg-primary-100/70 dark:bg-primary-950/70 text-primary-900 dark:text-primary-100 font-semibold'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                 }`}
+                role="button"
+                aria-current={currentChatId === chat.id ? 'true' : undefined}
               >
                 <div className="flex items-center gap-2 truncate">
                   <MessageSquare className="w-3.5 h-3.5 shrink-0 text-primary-500" />
@@ -229,6 +270,7 @@ export default function ChatPage() {
                   onClick={(e) => handleDeleteChat(e, chat.id)}
                   className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 rounded transition-opacity"
                   title="Delete chat"
+                  aria-label={`Delete chat: ${chat.title}`}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -246,6 +288,17 @@ export default function ChatPage() {
       {/* 2. Main Chat Conversation Area */}
       <div className="flex-1 flex flex-col justify-between bg-white/20 dark:bg-slate-900/20">
         
+        {/* Mobile conversation toggle */}
+        <div className="md:hidden flex items-center gap-2 p-3 border-b border-slate-200/80 dark:border-slate-800/80">
+          <button
+            onClick={() => setMobileListOpen(true)}
+            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Open conversation list"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Chat Sessions</span>
+        </div>
         {/* Messages Scroll Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
           {messages.length === 0 ? (
@@ -394,7 +447,7 @@ export default function ChatPage() {
             </button>
           </form>
           <div className="mt-1.5 flex justify-between text-[10px] text-slate-400 px-1">
-            <span>Powered by Google Gemini 1.5 Flash</span>
+            <span>Powered by Google Gemini 3.5 Flash Lite</span>
             <span>+5 XP per question asked</span>
           </div>
         </div>

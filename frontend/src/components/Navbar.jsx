@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -13,6 +13,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
   const { isDark, toggleTheme } = useTheme();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const menuRef = useRef(null);
 
   const handleLanguageChange = (newLang) => {
     // Save to user settings if authenticated
@@ -20,6 +21,30 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
       user.preferred_language = newLang;
     }
   };
+
+  // Close dropdown on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && userMenuOpen) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [userMenuOpen]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [userMenuOpen]);
 
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-200/80 dark:border-slate-800/80">
@@ -30,15 +55,16 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
           {isAuthenticated && (
             <button
               onClick={onToggleSidebar}
-              className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-              aria-label="Toggle navigation"
+              className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              aria-label={isSidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isSidebarOpen}
             >
               {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           )}
 
           <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary-600 via-primary-500 to-violetAccent-500 flex items-center justify-center text-white shadow-md shadow-primary-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary-600 via-primary-500 to-violetAccent-500 flex items-center justify-center text-white shadow-md shadow-primary-500/20 group-hover:scale-105 transition-transform duration-200">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
@@ -65,7 +91,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
               {/* Streak Counter */}
               <div 
                 title={`${user.streak_count || 0} Day Learning Streak`}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 text-xs font-semibold"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 text-xs font-semibold transition-colors"
               >
                 <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500 animate-pulse" />
                 <span>{user.streak_count || 0}d</span>
@@ -74,7 +100,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
               {/* XP Counter */}
               <div 
                 title={`${user.xp || 0} Total Experience Points`}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-violetAccent-600 dark:text-violet-300 text-xs font-semibold"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-violetAccent-600 dark:text-violet-300 text-xs font-semibold transition-colors"
               >
                 <Award className="w-3.5 h-3.5 text-violetAccent-500" />
                 <span>{user.xp || 0} XP</span>
@@ -93,17 +119,20 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
             onClick={toggleTheme}
             className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            aria-label="Toggle theme"
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
           >
             {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
           </button>
 
           {/* Auth Controls or Profile dropdown */}
           {isAuthenticated && user ? (
-            <div className="relative">
+            <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 p-1 pl-2 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left"
+                aria-expanded={userMenuOpen}
+                aria-haspopup="true"
+                aria-label="User menu"
               >
                 <div className="w-7 h-7 rounded-lg bg-primary-600 text-white font-semibold text-xs flex items-center justify-center shadow-sm">
                   {user.name ? user.name[0].toUpperCase() : 'S'}
@@ -116,7 +145,11 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div
+                  className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-2 z-50 animate-scale-in"
+                  role="menu"
+                  aria-orientation="vertical"
+                >
                   <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
                     <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">{user.name}</p>
                     <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
@@ -124,7 +157,8 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
                   <Link
                     to="/profile"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    role="menuitem"
                   >
                     <UserIcon className="w-3.5 h-3.5" />
                     Student Profile
@@ -132,7 +166,8 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
                   <Link
                     to="/settings"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    role="menuitem"
                   >
                     <Settings className="w-3.5 h-3.5" />
                     Settings
@@ -144,7 +179,8 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
                       logout();
                       navigate('/');
                     }}
-                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    role="menuitem"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     Sign Out
@@ -162,7 +198,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
               </Link>
               <Link
                 to="/register"
-                className="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow transition-all"
+                className="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow transition-all active:scale-[0.97]"
               >
                 Get Started
               </Link>

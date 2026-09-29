@@ -16,6 +16,7 @@ import {
   BookOpen,
   HelpCircle,
 } from 'lucide-react';
+import { useToast } from '../components/Toast';
 
 const DIFFICULTIES = [
   { id: 'beginner', label: 'Beginner' },
@@ -43,6 +44,7 @@ export default function ExplainPage() {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const toast = useToast();
 
   useEffect(() => {
     if (initialConcept) {
@@ -74,6 +76,7 @@ export default function ExplainPage() {
     if (!explanation) return;
     navigator.clipboard.writeText(explanation);
     setCopied(true);
+    toast.success('Copied!', 'Explanation copied to clipboard.');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -87,6 +90,7 @@ export default function ExplainPage() {
         metadata_json: { difficulty, style },
       });
       setSaved(true);
+      toast.success('Saved!', 'Explanation saved to your library.');
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
       console.error(err);
@@ -94,7 +98,7 @@ export default function ExplainPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-200">
+    <div className="max-w-4xl mx-auto space-y-8 animate-slide-up">
       
       {/* Header */}
       <div className="text-center sm:text-left">
@@ -130,7 +134,7 @@ export default function ExplainPage() {
             <button
               onClick={() => handleExplain()}
               disabled={!concept.trim() || loading}
-              className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-primary-500/25 flex items-center gap-2 transition-all disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-primary-500/25 flex items-center gap-2 transition-all disabled:opacity-50 active:scale-[0.97]"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               <span>Explain</span>
@@ -202,7 +206,7 @@ export default function ExplainPage() {
 
       {/* Output Content */}
       {explanation && !loading && (
-        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl space-y-6 animate-in fade-in duration-300">
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl space-y-6 animate-slide-up">
           
           <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
             <div>
@@ -225,7 +229,7 @@ export default function ExplainPage() {
 
               <button
                 onClick={handleSave}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-sm transition-all"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-sm transition-all active:scale-[0.97]"
               >
                 {saved ? <Check className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
                 <span>{saved ? 'Saved' : 'Save'}</span>

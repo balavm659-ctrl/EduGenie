@@ -66,7 +66,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-200">
+    <div className="max-w-4xl mx-auto space-y-8 animate-slide-up">
       
       {/* Header */}
       <div>

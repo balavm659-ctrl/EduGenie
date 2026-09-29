@@ -1,0 +1,54 @@
+# Render.com Blueprint — One-click deploy configuration
+# Docs: https://docs.render.com/blueprint-spec
+
+services:
+  # ── Backend (FastAPI + Python) ──
+  - type: web
+    name: edugenie-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false  # You'll set this manually in the Render dashboard
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: JWT_SECRET
+        generateValue: true  # Render auto-generates a secure random string
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRATION_HOURS
+        value: "24"
+      - key: DATABASE_URL
+        value: sqlite:///./edugenie.db
+      - key: FRONTEND_URL
+        fromService:
+          name: edugenie
+          type: web
+          property: host
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+  # ── Frontend (React + Vite Static Site) ──
+  - type: web
+    name: edugenie
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: edugenie-api
+          type: web
+          property: host

@@ -65,7 +65,7 @@ export default function ProgressPage() {
   const s = streakData || {};
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
+    <div className="space-y-8 animate-slide-up">
       
       {/* Header */}
       <div>

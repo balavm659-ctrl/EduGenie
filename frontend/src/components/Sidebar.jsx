@@ -34,7 +34,8 @@ export default function Sidebar({ isOpen, onClose }) {
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm lg:hidden animate-fade-in"
+          aria-hidden="true"
         />
       )}
 
@@ -43,6 +44,8 @@ export default function Sidebar({ isOpen, onClose }) {
         className={`fixed top-16 bottom-0 left-0 z-40 w-64 glass-panel border-r border-slate-200/80 dark:border-slate-800/80 transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } flex flex-col justify-between overflow-y-auto p-4`}
+        role="navigation"
+        aria-label="Main navigation"
       >
         <div className="space-y-6">
           {/* Main Navigation */}
@@ -50,7 +53,7 @@ export default function Sidebar({ isOpen, onClose }) {
             <div className="px-3 mb-2 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
               Learning Suite
             </div>
-            <nav className="space-y-1">
+            <nav className="space-y-1" role="menubar" aria-label="Learning tools">
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -67,6 +70,8 @@ export default function Sidebar({ isOpen, onClose }) {
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                       }`
                     }
+                    role="menuitem"
+                    aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
                   >
                     <div className="flex items-center gap-3">
                       <Icon className="w-4 h-4 shrink-0" />

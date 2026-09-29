@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import VoiceInput from '../components/VoiceInput';
 import { LoadingSkeleton, CardSkeleton } from '../components/LoadingSkeleton';
+import ErrorState from '../components/ErrorState';
 import {
   Sparkles,
   Flame,
@@ -28,19 +29,24 @@ export default function DashboardPage() {
 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [quickPrompt, setQuickPrompt] = useState('');
 
-  useEffect(() => {
-    async function fetchDashboard() {
-      try {
-        const data = await api.getDashboard();
-        setDashboardData(data);
-      } catch (err) {
-        console.error("Dashboard fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
+  const fetchDashboard = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.getDashboard();
+      setDashboardData(data);
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+      setError(err.message || 'Failed to load dashboard data.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchDashboard();
   }, []);
 
@@ -56,7 +62,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-fade-in">
         <LoadingSkeleton lines={3} />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
@@ -65,10 +71,20 @@ export default function DashboardPage() {
     );
   }
 
+  if (error) {
+    return (
+      <ErrorState
+        title="Couldn't load your dashboard"
+        message={error}
+        onRetry={fetchDashboard}
+      />
+    );
+  }
+
   const d = dashboardData || {};
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
+    <div className="space-y-8 animate-slide-up">
       
       {/* 1. Header & Greeting */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -158,7 +174,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 3. Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
         
         {/* Streak */}
         <div className="p-5 rounded-2xl glass-panel border border-slate-200/80 dark:border-slate-800/80 shadow-sm flex items-center gap-4">

@@ -134,7 +134,7 @@ export default function LearningPathPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-200">
+    <div className="max-w-5xl mx-auto space-y-8 animate-slide-up">
       
       {/* Top Header & Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -369,7 +369,7 @@ export default function LearningPathPage() {
       {/* CREATE MODAL */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="max-w-lg w-full glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="max-w-lg w-full glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 animate-scale-in">
             
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <h3 className="text-base font-bold text-slate-900 dark:text-white">

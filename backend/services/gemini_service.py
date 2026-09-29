@@ -99,8 +99,25 @@ def _safe_generate(model, prompt: str, fallback: str = "I'm sorry, I couldn't ge
             return response.text
         return fallback
     except Exception as e:
-        logger.error(f"Gemini API error: {str(e)}")
-        raise RuntimeError(f"AI generation failed: {str(e)}")
+        error_str = str(e).lower()
+        error_msg = str(e)
+
+        # Differentiate error types for accurate reporting
+        if "401" in error_str or "403" in error_str or "permission" in error_str:
+            logger.error(f"Gemini API authentication/permission error: {error_msg}")
+            raise RuntimeError(f"API key or permission issue: {error_msg}")
+        elif "404" in error_str or "not found" in error_str or "no longer available" in error_str:
+            logger.error(f"Gemini API model not found: {error_msg}")
+            raise RuntimeError(f"Model not available (404). Check GEMINI_MODEL in .env: {error_msg}")
+        elif "429" in error_str or "quota" in error_str or "rate" in error_str:
+            logger.error(f"Gemini API rate limit/quota error: {error_msg}")
+            raise RuntimeError(f"API rate limit or quota exceeded. Please wait and try again: {error_msg}")
+        elif "500" in error_str or "503" in error_str or "internal" in error_str:
+            logger.error(f"Gemini API server error: {error_msg}")
+            raise RuntimeError(f"Gemini server error. Please try again later: {error_msg}")
+        else:
+            logger.error(f"Gemini API error: {error_msg}")
+            raise RuntimeError(f"AI generation failed: {error_msg}")
 
 
 # ──────────────────────── Q&A ────────────────────────

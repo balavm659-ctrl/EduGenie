@@ -124,7 +124,7 @@ export default function QuizPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-200">
+    <div className="max-w-3xl mx-auto space-y-8 animate-slide-up">
       
       {/* Header */}
       <div className="text-center sm:text-left">
@@ -198,7 +198,7 @@ export default function QuizPage() {
           <button
             onClick={() => handleGenerateQuiz()}
             disabled={!topic.trim()}
-            className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+            className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 active:scale-[0.97]"
           >
             <Sparkles className="w-4 h-4" />
             <span>Generate Quiz Questions</span>
@@ -286,7 +286,7 @@ export default function QuizPage() {
             {currentQIndex === quizData.questions.length - 1 ? (
               <button
                 onClick={handleSubmitQuiz}
-                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md shadow-emerald-500/25 flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md shadow-emerald-500/25 flex items-center gap-2 active:scale-[0.97]"
               >
                 <span>Submit Quiz</span>
                 <CheckSquare className="w-4 h-4" />
